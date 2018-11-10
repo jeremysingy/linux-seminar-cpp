@@ -40,12 +40,12 @@
 <script type="text/template">
 ## User-defined literals
 
-As a every languages, C++ defines a lot of build-in literals:
+As a every languages, C++ defines a lot of built-in literals:
 
 ```
 auto i = 32;   // int
 auto s = 32s;  // short
-auto d = 4.27  // double
+auto d = 4.27; // double
 auto b = true; // bool
 ```
 
@@ -53,8 +53,8 @@ But what about defining your own?
 
 ```
 auto distance = 42.5_km; // creates an object of type Dist
-distance += 500_m; // is now 43 km
-auto speed = my_voltage * 0.5_A
+distance += 500_m;       // is now 43 km
+auto speed = distance / 1_hour
 ```
 </script>
 </section>
@@ -66,7 +66,7 @@ auto speed = my_voltage * 0.5_A
 C++11 introduces the definition of custom literal operators:
 
 ```
-Dist operator ""_km(long double d) {
+Dist operator "" _km(long double d) {
   return distFromKm(d);
 }
 ```
@@ -136,7 +136,7 @@ std::optional<int> parse_int(const std::string& s);
 
 auto oi = parse_int("22");
 if(oi)
-  use(*oid);
+  use(*oi);
 std::cout << "value: " << oi.value_or("****") << '\n';
 ```
 
