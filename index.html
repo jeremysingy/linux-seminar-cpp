@@ -42,7 +42,7 @@
 
 As a every languages, C++ defines a lot of built-in literals:
 
-```
+```cpp
 auto i = 32;   // int
 auto s = 32s;  // short
 auto d = 4.27; // double
@@ -51,7 +51,7 @@ auto b = true; // bool
 
 But what about defining your own?
 
-```
+```cpp
 auto distance = 42.5_km; // creates an object of type Dist
 distance += 500_m;       // is now 43 km
 auto speed = distance / 1_hour
@@ -65,14 +65,14 @@ auto speed = distance / 1_hour
 
 C++11 introduces the definition of custom literal operators:
 
-```
+```cpp
 Dist operator "" _km(long double d) {
   return distFromKm(d);
 }
 ```
 Also used in the standard library, e.g. `chrono`:
 
-```
+```cpp
 using namespace std::chrono_literals;
 
 std::this_thread::sleep_for(250ms);
@@ -115,7 +115,7 @@ At Delta: we have to deal with voltage, current, etc.
 
 To express that there *may* be value returned.
 
-```
+```cpp
 X parse_int(const std::string& s);
 ```
 
@@ -131,7 +131,7 @@ What type for `X`? Typical solutions:
 <script type="text/template">
 ## Sum types: `std::optional`
 
-```
+```cpp
 std::optional<int> parse_int(const std::string& s);
 
 auto oi = parse_int("22");
@@ -172,7 +172,7 @@ Base library not really new, but has now improved a lot with the newest features
 
 Example: count even elements in a sequence
 
-```
+```cpp
 std::vector<int> nums = {7, 2, 8, 13, 21, 42};
 
 int c = 0;
@@ -185,7 +185,7 @@ for(int i = 0; i < nums.size(); ++i)
 
 Using range-based for loop:
 
-```
+```cpp
 int c = 0;
 for(const auto& n : nums)
 {
@@ -200,7 +200,7 @@ for(const auto& n : nums)
 <script type="text/template">
 Using a standard algorithm
 
-```
+```cpp
 auto c = std::count_if(begin(nums), end(nums), [](auto n) {
   return n % 2 == 0; // predicate
 });
@@ -249,7 +249,7 @@ There are also new specific algos (reduce, scan, ...)
 
 I want to get even elements and double their values:
 
-```
+```cpp
 auto rng = nums | view::filter([](auto n) { return n % 2 == 0; })
                 | view::transform([](auto n) { return 2 * n; });
 ```
