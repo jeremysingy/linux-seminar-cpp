@@ -299,11 +299,11 @@ std::sort(a.begin(), a.end(), [](int a, int b) { return a > b; });
 ## Compile-time computation
 
 * Until C++11, compile-time computations were limited to template metaprogramming
-* C++11 introduced the notion of `constexpr` (constant expressions)
-  * The value of a `constexpr` variable must be known at compile-time
-  * The value of a `constexpr` variable can be used in constant expressions
-  * A `constexpr` function can be used with constant arguments in a constant expressions
-  * A `constexpr` function can also be invoked with non-constant arguments, at runtime
+* C++11 introduced the notion of `constexpr`
+  * `constexpr` variable's value must be known at compile-time
+  * `constexpr` variable's value can be used in constant expressions
+  * A `constexpr` function can be used in a constant expressions
+  * A `constexpr` function can also be invoked at runtime
 </script>
 </section>
 
