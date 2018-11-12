@@ -343,19 +343,15 @@ int array[pow(2, 10)];
 ## Generalized constant expressions
 
 * C++14 relaxed the `constexpr` functions limitations
-* A `constexpr` function can now include any statement but:
-  * `asm` declarations, goto, try-block, non-literal type variable definitions
 
 * pow can be rewritten without recursion:
 
 ```cpp
 constexpr int pow(int x, int n) {
     int acc = 1;
-
     for (size_t i = 0; i < n; ++i) {
         acc *= x;
     }
-
     return acc;
 }
 ```
