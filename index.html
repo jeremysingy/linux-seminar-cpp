@@ -30,6 +30,11 @@
       .reveal ol {
         display: block;
       }
+      .reveal section img {
+        background: none;
+        border: none;
+        box-shadow: none;
+      }
     </style>
 	</head>
 	<body>
@@ -54,7 +59,7 @@ But what about defining your own?
 ```cpp
 auto distance = 42.5_km; // creates an object of type Dist
 distance += 500_m;       // is now 43 km
-auto speed = distance / 1_hour
+auto speed = distance / 1_hour;
 ```
 </script>
 </section>
@@ -70,15 +75,20 @@ Dist operator "" _km(long double d) {
   return distFromKm(d);
 }
 ```
-Also used in the standard library, e.g. `chrono`:
+
+Also used in the standard library, e.g. `chrono` or `complex`:
 
 ```cpp
 using namespace std::chrono_literals;
+using namespace std::complex_literals;
 
 std::this_thread::sleep_for(250ms);
 
 std::chrono::seconds hour_in_sec = 1h;
-std::cout << hour_in_sec.count() << '\n'; // prints 3600
+std::cout << hour_in_sec.count() << '\n';   // prints 3600
+
+std::complex<double> c = 1.0 + 1i;
+std::cout << abs(c) << '\n';                // prints 1.41421
 ```
 </script>
 </section>
@@ -87,33 +97,66 @@ std::cout << hour_in_sec.count() << '\n'; // prints 3600
 <script type="text/template">
 ## User-defined literals
 
-Also possible to define *raw* literals and perform checks on the actual characters given.
-
-  - Allow to easily define value-like types (type with unit, etc.)
-  - Improved type safety: define your type as classes and create them is easily as integers or doubles
+  - Allow to easily define value-like types e.g. (type with unit, etc.)
+    - types with units: distance, time, weight, ...
+    - mathematical types: complex, vector
+  - Improved type safety
+    - define your type as classes and create them is easily as integers or doubles
   - Have types behaving exactly like built-in types
 </script>
 </section>
 
 <section data-markdown>
 <script type="text/template">
-## User-defined literals
+## Raw literals operator
 
-At Delta: we have to deal with voltage, current, etc.
+Also possible to define *raw* literals
+  - operator template enabling to perform checks on the actual characters given.
 
+```cpp
+template <char... str>
+double operator "" _bin();
+
+auto ten  = 1010_bin;  // equivalent as below
+auto ten2 = operator "" _bin <'1', '0', '1', '0'>();
+
+auto error = 1002_bin; // wouldn't compile because 2 is not binary!
+```
+  - more errors may be found at compile-time!
+
+</script>
+</section>
+
+
+<section data-markdown>
+<script type="text/template">
+At Delta, we have to deal a lot with voltages, currents, etc.
   - Electrical measurements at the core of our system
-  - Avoid type mismatch at compile-time
+
+```cpp
+typedef int16_t Voltage;     // before...
+class Voltage { /* ... */ }; // now complete type definition
+
+Voltage v1 = 52.2_V;   // OK: 52.2 V (internally integer 5220)
+Voltage v2 = 5220_cV;  // OK: same value expressed in centivolts
+Voltage v3 = v2 + 5_V; // OK
+Voltage err1 = 53;     // ERROR: no constructor Voltage(int)
+Voltage err2 = v1 + 5; // ERROR
+```
+  - Migrating from `typedef` to a class with UDL found old bugs!
     - `Vdc != Vac`
-    - `[A] * [V] == [W]`
-  - Migrating type `Voltage` from a `typedef` to a class with UDL found some old bugs!
+  - Potentially enables to detect type mismatch at compile-time
+    - `[A] * [V] => [W]`
 </script>
 </section>
 
 <section data-markdown>
 <script type="text/template">
-## Sum types: `std::optional`
+## Optional
 
 To express that there *may* be value returned.
+
+Example:
 
 ```cpp
 X parse_int(const std::string& s);
@@ -121,15 +164,18 @@ X parse_int(const std::string& s);
 
 What type for `X`? Typical solutions:
 
-  - :-( special value (`0`, `-1`, `MAX_INT`, ...)
-  - :-( use a pointer
-  - :-( return a separate error code
+  - ☹ use int with special value (`0`, `-1`, `MAX_INT`, ...)
+  - ☹ use a pointer to int
+  - ☹ return a separate error code / pass by reference
+  - 😐 use exceptions?
 </script>
 </section>
 
 <section data-markdown>
 <script type="text/template">
-## Sum types: `std::optional`
+## Optional
+
+A type with a semantic of optional value:
 
 ```cpp
 std::optional<int> parse_int(const std::string& s);
@@ -141,9 +187,8 @@ std::cout << "value: " << oi.value_or("****") << '\n';
 ```
 
   - Clearly expresses the intent (function signature)
-  - No need for dynamic allocation or separate flag
-  - No need for exceptions
-
+  - No need for dynamic allocation, separate flag or exceptions
+  - Other *sum types* now standard: `variant`, `any`, ...
 </script>
 </section>
 
@@ -153,16 +198,16 @@ std::cout << "value: " << oi.value_or("****") << '\n';
 
 Collection of *generic* algorithms useful in day-to-day programming
 
+  - are clearly named
   - avoid common mistakes with loops (off-by-one, special cases)
   - are well-tested and optimized
-  - can be composed / specialized
-  - are named 
+  - can be easily specialized (take predicates)
 
-Base library not really new, but has now improved a lot with the newest features
+Not really new, but has now improved a lot with the newest features
 
   - lambdas
   - parallelism / vectorization (C++17)
-  - really unleashed with *ranges* (C++20+)
+  - really unleashed with *ranges* (C++20)
 </script>
 </section>
 
@@ -198,6 +243,8 @@ for(const auto& n : nums)
 
 <section data-markdown>
 <script type="text/template">
+## Algorithms library
+
 Using a standard algorithm
 
 ```cpp
@@ -212,23 +259,29 @@ auto c = std::count_if(begin(nums), end(nums), [](auto n) {
 </script>
 </section>
 
-<section data-markdown> 
+<section data-markdown>
 <script type="text/template">
-## Execution policies 
 
-3 different execution policies:
+<center><img data-src="images/algos-list.png" height="580" /></center>
+<small>Source: https://en.cppreference.com/w/cpp/algorithm</small>
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Algos: Execution Policies 
+
+- Three different execution policies:
   - sequenced (`std::execution::seq`)
   - parallel (`std::execution::par`)
   - parallel unsequenced (`std::execution::par_unseq`)
     - enables vectorization
-
-Most algorithms can be parameterized with the new policies
-
-There are also new specific algos (reduce, scan, ...)
+- Most algorithms can be parameterized with the new policies
+- There are also new specific algos (reduce, scan, ...)
 </script>
 </section>
 
-<section data-markdown> 
+<section data-markdown>
 <script type="text/template">
 ## Ranges
 
@@ -236,33 +289,72 @@ There are also new specific algos (reduce, scan, ...)
    - Always the need to manipulate iterators
    - Composition of algorithms: not easy
  - Going one step further: *ranges*
-   - A range is something that as a begin and an end
+   - A range is something that as a *begin* and an *end*
    - E.g. all containers are themselves ranges
  - Concepts of *smart iteration* and *adaptors*
    - Enables to chain computations in shell-like piping style
 </script>
 </section>
 
-<section data-markdown> 
+<section data-markdown>
 <script type="text/template">
-## Example
+## Ranges
 
-I want to get even elements and double their values:
+- Example: get even elements in a sequence and double their values:
 
 ```cpp
+std::vector<int> nums{/* ... */};
 auto rng = nums | view::filter([](auto n) { return n % 2 == 0; })
                 | view::transform([](auto n) { return 2 * n; });
 ```
 
+- Sort and make and remove duplicates:
+
+```cpp
+nums |= action::sort | action::unique;
+```
+
+Views are *lazy*, actions are *eager*
+
+<small>Live example: http://coliru.stacked-crooked.com/a/dd4e77376205a07e</small>
 </script>
 </section>
 
-<section data-markdown> 
+<section data-markdown>
 <script type="text/template">
-## Example
 
+- There is **a lot** we didn't say
+- Since 2011, C++ has become a whole new language
+  - Paradigm shift: not OO or C-with-class!
+  - Support for multiple paradigms:
+    - data abstraction, generic programming, functional programming, OOP, ...
+- Zero-cost abstraction
+  - *You don’t pay for what you don’t use*
+- Keep simple things simple
+  - Not everybody needs to know the whole thing
+  - If you *really* need to cut some abstraction, it still IS possible
 
+</script>
+</section>
 
+<section data-markdown>
+<script type="text/template">
+## Thank You
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## We're hiring!
+
+<center><img data-src="images/delta-logo.png" width="500" /></center>
+
+- Want to work with Embedded Linux and modern C++?
+- At Delta, we develop Telecom Power Solutions
+- We're looking for some engineers:
+  - Embedded Software and Hardware
+  - Location: Bern-Bümpliz
+- Reach me at the apero or <jeremy.singy@deltaww.com>
 </script>
 </section>
 
@@ -289,6 +381,7 @@ auto rng = nums | view::filter([](auto n) { return n % 2 == 0; })
 	      height: 700,
 				margin: 0.05,
 				minScale: 0.05,
+				center: true,
 				//width: '8 0%'
 			});
 		</script>
