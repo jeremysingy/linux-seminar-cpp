@@ -42,12 +42,12 @@
 <section class="title-slide">
 <h1>Modern C++</h1>
 <h2>Features and Practice</h2>
-<small class="float-left">
+<small class="float-left" style="margin: 3em">
 Baptiste Wicht<br/>
 <a href="https://twitter.com/wichtounet">@wichtounet</a><br/>
 <a href="mailto:baptistewicht@gmail.com">baptistewicht@gmail.com</a>
 </small>
-<small class="float-right">
+<small class="float-right" style="margin: 3em">
 Jérémy Singy<br/>
 <a href="https://twitter.com/jeremsin">@jeremsin</a><br/>
 <a href="mailto:jeremy.singy@gmail.com">jeremy.singy@gmail.com</a>
@@ -419,7 +419,6 @@ struct static_matrix {
    static_assert(Cols > 0, "Invalid Cols");
 }
 ```
-
 </script>
 </section>
 				
@@ -690,7 +689,7 @@ auto rng = nums | view::filter([](auto n) { return n % 2 == 0; })
                 | view::transform([](auto n) { return 2 * n; });
 ```
 
-- Sort and make and remove duplicates:
+- Sort and remove duplicates:
 
 ```cpp
 nums |= action::sort | action::unique;
