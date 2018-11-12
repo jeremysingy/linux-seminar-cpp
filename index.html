@@ -43,6 +43,366 @@
 
 <section data-markdown>
 <script type="text/template">
+## Table of contents
+
+TODO (Singy)
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Introduction
+
+* C++ has a long history
+  * Started in 1938 as C with classes
+
+* Many people consider C++03 as the current C++
+* But C++ evolved a lot in the last years
+  * C++11: Threads, Lambda Expressions, ...
+  * C++14: Variable templates, compile-time computation, ...
+  * C++17: Parallel algorithms, static if, ...
+
+* Modern C++ is almost a different language than C++03
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Automatic Type Deduction
+
+* C++11 introduces the notion of automatic type inference
+* The `auto` keyword represents an automatically deduced type
+
+```cpp
+auto v1 = 5;                       //v1 type is int
+auto v2 = true;                    //v2 type is bool
+auto v3 = some_container.size();   //v3 type is likely to be std::size_t
+auto v4 = some_function(1,2,3);    //v4 type depends on the return type 
+```
+
+* Usage: Use `auto` to avoid complicated dependent types
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Automatic Type Deduction
+
+```cpp
+std::vector<int> v;
+
+// Fill the vector
+
+std::vector<int>::iterator it  = v.begin();
+std::vector<int>::iterator end = v.end();
+```
+
+* Becomes
+
+```cpp
+std::vector<int> v;
+
+// Fill the vector
+
+auto it  = v.begin();
+auto end = v.end();
+```
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Variadic templates
+
+* Until C++11, templates had a fixed number of parameters
+* C++11 introduced variadic templates
+
+* Example:
+
+```cpp
+template<typename... Types>
+struct meta_list { };
+```
+
+* Non-type template parameters are also possible:
+
+```cpp
+template<bool... Bools>
+struct meta_bool_list { };
+```
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Variadic templates
+
+* `...` after a variadic expression will unfold the expression
+  * with , in between
+* `sizeof...(T)` returns the number of variadic arguments
+* A template can have several parameter variadic packs
+  * A list of types and a list of indices is very common
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Examples
+
+```cpp
+template<typename H, typename... T>
+struct and : std::bool_constant<H::value && and<T...>::value> {};
+
+template<typename H>
+struct and<H> : std::bool_constant<H::value> {};
+```
+
+```cpp
+template<size_t F, size_t... Dims>
+struct mul : std::integral_constant<size_t, F * mul<Dims...>::value> {};
+
+template<size_t F>
+struct mul<F> : std::integral_constant<size_t, F> {};
+
+template<typename T, size_t... Dims>
+struct static_matrix {
+    static size_t size(){
+        return mul<Dims...>::value;
+    }
+};
+```
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Fold Expressions
+
+* C++17 comes with fold expressions
+* Can simplify variadic templates code a lot
+
+```cpp
+template<typename... H>
+struct and_c : std::bool_constant<(H::value && ...)> {};
+```
+
+```cpp
+template<typename T, size_t... Dims>
+struct static_matrix {
+    static size_t size(){
+        return (1 * ... * Dims);
+    }
+};
+```
+
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Move semantic
+
+* Until C++11, C++ only had a semantic of copy
+  * Sometimes, you want to move an object inside another
+* C++11 introduced move semantic
+  * An Rvalue reference is a reference to a temporary : `int&&`
+  * `std::move` forces a move of an object (cast to rvalue)
+* Three advantages:
+  * Ownership expressiveness
+  * Speed for some containers
+  * Perfect forwarding
+
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Move
+
+* With rvalue references come two new members
+  * move constructor: `type(type&& rhs)`
+  * move operator: `type& operator=(type&& rhs)`
+* Inside these members, you can steal data from rhs
+* Sometimes, a move can be much faster than a copy
+  * `std::vector` for instance
+* Every type can be move-able, but not all in an efficient way
+  * `std::array` cannot be moved more efficiently than a copy
+
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Example
+
+```cpp
+struct container {
+    int* data;
+    container() : data(new int[1000]) {}
+    container(container&& rhs) {
+        data = rhs.data;    //Steal the data
+        rhs.data = nullptr; //Release ownership
+    }
+    container& operator=(container&& rhs) {
+        if (&rhs == this) { return *this; }
+        if (data) { delete[] data; }
+        data = rhs.data;    //Steal the data
+        rhs.data = nullptr; //Release ownership
+        return *this;
+    }
+};
+```
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Lambda expressions
+
+* The STL is all about functors and predicates
+  * Need to create functions and structures
+  * May create a lot of code
+* C++11 introduced lambda expressions to the language
+  * Create anonymous *functor* and pass them to algorithms
+
+* Basic example:
+
+```cpp
+auto c = []{ std::cout << "Hello" << std::endl; };
+c();
+```
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Parameters
+
+* A lambda can take any number of parameters
+
+```cpp
+auto c1 = [](int a){ std::cout << a << '\n'; };
+c1(11);
+auto add = [](int& a, int b){ a += b; };
+int a = 5;
+add(a, 4);
+```
+
+* A lambda can be passed to an algorithm
+
+```cpp
+std::vector<int> a(10);
+std::for_each(a.begin(), a.end(), [](int& a){ ++a; });
+std::for_each(a.begin(), a.end(), [](int a){ std::cout << a << '\n'; });
+std::sort(a.begin(), a.end(), [](int a, int b) { return a > b; });
+```
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Compile-time computation
+
+* Until C++11, compile-time computations were limited to template metaprogramming
+* C++11 introduced the notion of `constexpr`
+  * `constexpr` variable's value must be known at compile-time
+  * `constexpr` variable's value can be used in constant expressions
+  * A `constexpr` function can be used in a constant expressions
+  * A `constexpr` function can also be invoked at runtime
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Generalized constexpr
+
+* Need Pow in a constant expression?
+
+```cpp
+template<int X, int N>
+struct Pow : std::integer_constant<int, N * Pow<X, N - 1>::value> {};
+
+template<int X>
+struct Pow <X, 0> : std::integer_constant<int, 1> {};
+```
+
+* In C++11 this can be rewritten as:
+
+```cpp
+constexpr int pow(int x, int n){
+    return n == 0 ? 1 : x * pow(x, n - 1);
+}
+```
+
+* And used like any other function, even in constant context:
+
+```cpp
+int array[pow(2, 10)];
+```
+
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Generalized constant expressions
+
+* C++14 relaxed the `constexpr` functions limitations
+
+* pow can be rewritten without recursion:
+
+```cpp
+constexpr int pow(int x, int n) {
+    int acc = 1;
+    for (size_t i = 0; i < n; ++i) {
+        acc *= x;
+    }
+    return acc;
+}
+```
+
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## if constexpr
+
+* Even with a constant, both branches of `if` will be compiled
+* Developers are using SFINAE to not instantiate some code
+* `if constexpr` can solve this issue in a nice way
+  * Both branches are parsed
+  * But false branch is not instantiated!
+* This can make code significantly cleaner!
+  * And faster to compile!
+
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## static assertions
+
+* C++11 introduce the `static_assert` construct
+  * Validates constant expressions at compile-time
+  * If the assertion fails, the compilation fails
+
+* Very useful to test template arguments
+
+```cpp
+template<typename T, size_t Rows, size_t Cols>
+struct static_matrix {
+   static_assert(!std::is_same<T, bool>::value, "static_matrix<bool>!!!");
+   static_assert(Rows > 0, "Invalid Rows");
+   static_assert(Cols > 0, "Invalid Cols");
+}
+```
+
+</script>
+</section>
+				
+<section data-markdown>
+<script type="text/template">
 ## User-defined literals
 
 As a every languages, C++ defines a lot of built-in literals:
