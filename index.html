@@ -50,7 +50,10 @@ Baptiste Wicht<br/>
 <small class="float-right" style="margin: 3em">
 Jérémy Singy<br/>
 <a href="https://twitter.com/jeremsin">@jeremsin</a><br/>
-<a href="mailto:jeremy.singy@gmail.com">jeremy.singy@gmail.com</a>
+<a href="mailto:jeremy.singy@gmail.com">jeremy.singy@gmail.com</a><br/>
+<br/>
+<em>Delta Electronics (Switzerland) AG</em><br/>
+<a href="mailto:jeremy.singy@deltaww.com">jeremy.singy@deltaww.com</a>
 </small>
 </section>
 
@@ -284,7 +287,7 @@ struct container {
   * Need to create functions and structures
   * May create a lot of code
 * C++11 introduced lambda expressions to the language
-  * Create anonymous *functor* and pass them to algorithms
+  * Create anonymous *functors* and pass them to algorithms
 
 * Basic example:
 
@@ -534,9 +537,7 @@ Voltage err2 = v1 + 5; // ERROR
 <script type="text/template">
 ## Optional
 
-To express that there *may* be value returned.
-
-Example:
+How to express that there *may* be a value returned?
 
 ```cpp
 X parse_int(const std::string& s);
@@ -667,7 +668,7 @@ auto c = std::count_if(begin(nums), end(nums), [](auto n) {
 
  - Problem with algorithms:
    - Always the need to manipulate iterators
-   - Composition of algorithms: not easy
+   - Composition not easy
  - Going one step further: *ranges*
    - A range is something that as a *begin* and an *end*
    - E.g. all containers are themselves ranges
