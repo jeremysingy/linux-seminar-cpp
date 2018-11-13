@@ -79,12 +79,12 @@ Jérémy Singy<br/>
   * Started in 1983 as C with classes
 
 * Many people consider C++98/C++03 as the current C++
-* But C++ evolved a lot in the last years
+* But C++ evolved a lot
   * C++11: Threads, Lambda Expressions, ...
   * C++14: Variable templates, compile-time computation, ...
   * C++17: Parallel algorithms, static if, ...
 
-* Modern C++ is almost a different language than C++03
+* Modern C++ is almost a new language
 </script>
 </section>
 
@@ -242,9 +242,8 @@ struct static_matrix {
 ## Move
 
 * With rvalue references come two new members
-  * move constructor: `type(type&& rhs)`
-  * move operator: `type& operator=(type&& rhs)`
-* Inside these members, you can steal data from rhs
+  * `type(type&& rhs)`
+  * `type& operator=(type&& rhs)`
 * Sometimes, a move can be much faster than a copy
   * `std::vector` for instance
 * Every type can be move-able, but not all in an efficient way
