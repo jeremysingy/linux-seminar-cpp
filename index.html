@@ -480,9 +480,9 @@ std::cout << abs(c) << '\n';                // prints 1.41421
 <script type="text/template">
 ## User-defined literals
 
-  - Allow to easily define value-like types e.g. (type with unit, etc.)
+  - Allow to easily define value-like types
     - types with units: distance, time, weight, ...
-    - mathematical types: complex, vector
+    - mathematical types: complex, point, ...
   - Improved type safety
     - define your type as classes and create them is easily as integers or doubles
   - Have types behaving exactly like built-in types
@@ -684,7 +684,7 @@ auto c = std::count_if(begin(nums), end(nums), [](auto n) {
 - Example: get even elements in a sequence and double their values:
 
 ```cpp
-std::vector<int> nums{/* ... */};
+std::vector<int> nums{1, 2, 3, 4, 5};
 auto rng = nums | view::filter([](auto n) { return n % 2 == 0; })
                 | view::transform([](auto n) { return 2 * n; });
 ```
